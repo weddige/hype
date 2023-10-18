@@ -1,4 +1,5 @@
 import logging
+from enum import Enum, auto
 from typing import List
 
 import yaml
@@ -19,12 +20,18 @@ class BotAccount:
 
 
 class Instance:
+    class Software(Enum):
+        MASTODON = auto()
+        PIXELFED = auto()
+
     name: str
     limit: int
+    software: Software
 
-    def __init__(self, name: str, limit: int) -> None:
+    def __init__(self, name: str, limit: int, software: Software=Software.MASTODON) -> None:
         self.name = name
         self.limit = limit if limit > 0 and limit <= 20 else 20
+        self.software = software
 
     def __repr__(self) -> str:
         return f"{self.name} (top {self.limit})"
@@ -90,7 +97,7 @@ class Config:
 
                 self.subscribed_instances = (
                     [
-                        Instance(name, props["limit"])
+                        Instance(name, props["limit"], Instance.Software[props.get("software", "mastodon").upper()])
                         for name, props in config["subscribed_instances"].items()
                     ]
                     if config.get("subscribed_instances")

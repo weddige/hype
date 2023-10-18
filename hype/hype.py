@@ -6,6 +6,7 @@ import schedule
 from mastodon import Mastodon
 
 from .config import Config
+from .pixelfed import get_trending_statuses
 
 
 class Hype:
@@ -43,12 +44,17 @@ class Hype:
         self.log.info("Run boost")
         for instance in self.config.subscribed_instances:
             try:
-                # Create mastodon API client
-                mastodon_client = self.init_client(instance.name)
-                # Fetch statuses from every subscribed instance
-                trending_statuses = mastodon_client.trending_statuses()[
-                    : instance.limit
-                ]
+                if instance.software == instance.Software.PIXELFED:
+                    trending_statuses = get_trending_statuses(instance.name)[
+                        : instance.limit
+                    ]
+                else:
+                    # Create mastodon API client
+                    mastodon_client = self.init_client(instance.name)
+                    # Fetch statuses from every subscribed instance
+                    trending_statuses = mastodon_client.trending_statuses()[
+                        : instance.limit
+                    ]
                 counter = 0
                 for trending_status in trending_statuses:
                     counter += 1
