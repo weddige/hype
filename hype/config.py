@@ -35,7 +35,7 @@ class Config:
     log_level: str = "INFO"
     subscribed_instances: List = []
     filtered_instances: List = []
-    profile_prefix: str = ""
+    profile: str = ""
     fields: dict = {}
 
     def __init__(self):
@@ -75,10 +75,8 @@ class Config:
                     config["log_level"] if config.get("log_level") else self.log_level
                 )
 
-                self.profile_prefix = (
-                    config["profile_prefix"]
-                    if config.get("profile_prefix")
-                    else self.profile_prefix
+                self.profile = (
+                    config["profile"] if config.get("profile") else self.profile
                 )
 
                 self.fields = (
@@ -97,9 +95,7 @@ class Config:
                 )
 
                 self.filtered_instances = (
-                    [
-                        name for name in config["filtered_instances"].items()
-                    ]
+                    [name for name in config["filtered_instances"].items()]
                     if config.get("filtered_instances")
                     else []
                 )
