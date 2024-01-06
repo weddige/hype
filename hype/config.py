@@ -27,11 +27,19 @@ class Instance:
     name: str
     limit: int
     software: Software
+    boost_text: bool
 
-    def __init__(self, name: str, limit: int, software: Software=Software.MASTODON) -> None:
+    def __init__(
+        self,
+        name: str,
+        limit: int,
+        software: Software = Software.MASTODON,
+        boost_only_media: bool = False,
+    ) -> None:
         self.name = name
         self.limit = limit if limit > 0 and limit <= 20 else 20
         self.software = software
+        self.boost_only_media = boost_only_media
 
     def __repr__(self) -> str:
         return f"{self.name} (top {self.limit})"
@@ -97,7 +105,14 @@ class Config:
 
                 self.subscribed_instances = (
                     [
-                        Instance(name, props["limit"], Instance.Software[props.get("software", "mastodon").upper()])
+                        Instance(
+                            name,
+                            props["limit"],
+                            Instance.Software[
+                                props.get("software", "mastodon").upper()
+                            ],
+                            props.get("boost_only_media", False),
+                        )
                         for name, props in config["subscribed_instances"].items()
                     ]
                     if config.get("subscribed_instances")
@@ -105,9 +120,7 @@ class Config:
                 )
 
                 self.filtered_instances = (
-                    [
-                        name for name in config["filtered_instances"]
-                    ]
+                    [name for name in config["filtered_instances"]]
                     if config.get("filtered_instances")
                     else []
                 )
