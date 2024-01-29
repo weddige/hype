@@ -57,9 +57,14 @@ class Hype:
                         source_account = status["account"]["acct"].split("@")
                         server = source_account[1]
                         filtered = server in self.config.filtered_instances
+                        # check if attached images have a description/alt text
+                        images_described = True
+                        for attachment in status.media_attachments:
+                            if attachment.description is None or attachment.description is "":
+                                images_described = False
                         # Boost if not already boosted
                         already_boosted = status["reblogged"]
-                        if not already_boosted and not filtered:
+                        if not already_boosted and not filtered and images_described:
                             self.client.status_reblog(status)
                         self.log.info(
                             f"{instance.name}: {counter}/{len(trending_statuses)} {'ignore' if (already_boosted or filtered)  else 'boost'}"
