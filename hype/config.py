@@ -2,7 +2,6 @@ from typing import List
 import yaml
 import logging
 
-
 class BotAccount:
     server: str
     email: str
@@ -37,6 +36,7 @@ class Config:
     filtered_instances: List = []
     profile: str = ""
     fields: dict = {}
+    delay: int = 0 # seconds
 
     def __init__(self):
         # auth file containing login info
@@ -70,6 +70,9 @@ class Config:
             if config:
                 self.interval = (
                     config["interval"] if config.get("interval") else self.interval
+                )
+                self.delay = (
+                    config["delay"] if config.get("delay") else self.delay
                 )
                 self.log_level = (
                     config["log_level"] if config.get("log_level") else self.log_level

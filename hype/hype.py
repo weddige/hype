@@ -66,6 +66,10 @@ class Hype:
                         already_boosted = status["reblogged"]
                         if not already_boosted and not filtered and images_described:
                             self.client.status_reblog(status)
+                            # if delay is set, wait for that amount of minutes
+                            if self.config.delay:
+                                self.log.info(f"sleeping for {self.config.delay} seconds")
+                                time.sleep(delay)
                         self.log.info(
                             f"{instance.name}: {counter}/{len(trending_statuses)} {'ignore' if (already_boosted or filtered)  else 'boost'}"
                         )
