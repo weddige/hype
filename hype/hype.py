@@ -6,6 +6,7 @@ import schedule
 from mastodon import Mastodon
 
 from .config import Config
+from .pixelfed import get_trending_statuses
 
 
 class Hype:
@@ -43,12 +44,17 @@ class Hype:
         self.log.info("Run boost")
         for instance in self.config.subscribed_instances:
             try:
-                # Create mastodon API client
-                mastodon_client = self.init_client(instance.name)
-                # Fetch statuses from every subscribed instance
-                trending_statuses = mastodon_client.trending_statuses()[
-                    : instance.limit
-                ]
+                if instance.software == instance.Software.PIXELFED:
+                    trending_statuses = get_trending_statuses(instance.name)[
+                        : instance.limit
+                    ]
+                else:
+                    # Create mastodon API client
+                    mastodon_client = self.init_client(instance.name)
+                    # Fetch statuses from every subscribed instance
+                    trending_statuses = mastodon_client.trending_statuses()[
+                        : instance.limit
+                    ]
                 counter = 0
                 for trending_status in trending_statuses:
                     counter += 1
@@ -58,16 +64,19 @@ class Hype:
                     )["statuses"]
                     if len(status) > 0:
                         status = status[0]
-                        # check if post comes from a filtered instance
+                        skip = False
+                        # Skip if post comes from a filtered instance
                         source_account = status["account"]["acct"].split("@")
                         server = source_account[-1]
-                        filtered = server in self.config.filtered_instances
-                        # Boost if not already boosted
-                        already_boosted = status["reblogged"]
-                        if not already_boosted and not filtered:
+                        skip = skip or server in self.config.filtered_instances
+                        # Skip if already boosted
+                        skip = skip or status["reblogged"]
+                        # Skip if media
+                        skip = skip or (instance.boost_only_media and not status["media_attachments"])
+                        if not skip:
                             self.client.status_reblog(status)
                         self.log.info(
-                            f"{instance.name}: {counter}/{len(trending_statuses)} {'ignore' if (already_boosted or filtered)  else 'boost'}"
+                            f"{instance.name}: {counter}/{len(trending_statuses)} {'ignore' if skip  else 'boost'}"
                         )
                     else:
                         self.log.warning(
