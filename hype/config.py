@@ -4,7 +4,6 @@ from typing import List
 
 import yaml
 
-
 class BotAccount:
     server: str
     email: str
@@ -35,11 +34,13 @@ class Instance:
         limit: int,
         software: Software = Software.MASTODON,
         boost_only_media: bool = False,
+        boost_only_described: bool = False,
     ) -> None:
         self.name = name
         self.limit = limit if limit > 0 and limit <= 20 else 20
         self.software = software
         self.boost_only_media = boost_only_media
+        self.boost_only_described = boost_only_described
 
     def __repr__(self) -> str:
         return f"{self.name} (top {self.limit})"
@@ -51,8 +52,9 @@ class Config:
     log_level: str = "INFO"
     subscribed_instances: List = []
     filtered_instances: List = []
-    profile_prefix: str = ""
+    profile: str = ""
     fields: dict = {}
+    delay: int = 0 # seconds
 
     def __init__(self):
         # auth file containing login info
@@ -87,14 +89,15 @@ class Config:
                 self.interval = (
                     config["interval"] if config.get("interval") else self.interval
                 )
+                self.delay = (
+                    config["delay"] if config.get("delay") else self.delay
+                )
                 self.log_level = (
                     config["log_level"] if config.get("log_level") else self.log_level
                 )
 
-                self.profile_prefix = (
-                    config["profile_prefix"]
-                    if config.get("profile_prefix")
-                    else self.profile_prefix
+                self.profile = (
+                    config["profile"] if config.get("profile") else self.profile
                 )
 
                 self.fields = (
@@ -112,6 +115,7 @@ class Config:
                                 props.get("software", "mastodon").upper()
                             ],
                             props.get("boost_only_media", False),
+                            props.get("boost_only_described", False),
                         )
                         for name, props in config["subscribed_instances"].items()
                     ]

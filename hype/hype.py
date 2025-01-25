@@ -31,10 +31,14 @@ class Hype:
 
     def update_profile(self):
         self.log.info("Update bot profile")
+<<<<<<< HEAD
         subscribed_instances_list = "\n".join(
             [f"- {instance}" for instance in self.config.subscribed_instances]
         )
         note = f"{self.config.profile_prefix}\n{subscribed_instances_list}"
+=======
+        note = self.config.profile
+>>>>>>> tante/main
         fields = [(key, value) for key, value in self.config.fields.items()]
         self.client.account_update_credentials(
             note=note, bot=True, discoverable=True, fields=fields
@@ -67,14 +71,24 @@ class Hype:
                         skip = False
                         # Skip if post comes from a filtered instance
                         source_account = status["account"]["acct"].split("@")
-                        server = source_account[-1]
+                        server = source_account[1]
                         skip = skip or server in self.config.filtered_instances
-                        # Skip if already boosted
+                        # Skip if no media
+                        skip = skip or (instance.boost_only_media and not status.media_attachments)
+                        # check if attached images have a description/alt text
+                        images_described = True
+                        for attachment in status.media_attachments:
+                            if attachment.description is None or attachment.description=="":
+                                images_described = False
+                        skip = skip or (instance.boost_only_media and not images_described)
+                        # Boost if not already boosted
                         skip = skip or status["reblogged"]
-                        # Skip if media
-                        skip = skip or (instance.boost_only_media and not status["media_attachments"])
                         if not skip:
                             self.client.status_reblog(status)
+                            # if delay is set, wait for that amount of minutes
+                            if self.config.delay:
+                                self.log.info(f"Sleeping for {self.config.delay} seconds after boosting {status.url}")
+                                time.sleep(self.config.delay)
                         self.log.info(
                             f"{instance.name}: {counter}/{len(trending_statuses)} {'ignore' if skip  else 'boost'}"
                         )
