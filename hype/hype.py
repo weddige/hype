@@ -26,6 +26,7 @@ class Hype:
             client_secret=self.config.bot_account.client_secret,
             access_token=self.config.bot_account.access_token,
             api_base_url=f"https://{self.config.bot_account.server}",
+            user_agent='HypeBot'
         )
 
     def update_profile(self):
