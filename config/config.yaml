@@ -1,8 +1,9 @@
 # Refresh interval in minutes
 interval: 60
 
-# Text to add to the bot profile befor the list of subscribed servers
-profile_prefix: "I am boosting trending posts from:"
+# Profile for the bot.
+# Ideally include a link to the list of servers or something
+profile: "This bot mirrors trending posts from other servers into this server's local timeline. You can find the list of Servers HERE"
 
 # profile fields to fill in
 fields:
